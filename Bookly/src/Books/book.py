@@ -1,10 +1,3 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
-from typing import List
-
-app = FastAPI()
-
-
 books = [
     
     {
@@ -53,44 +46,3 @@ books = [
         "language": "English",
     },
 ]
-class Book(BaseModel):
-    id:int  
-    title:str
-    author: str
-    publisher: str
-    published_date:str
-    page_count: int
-    language:str
-    
-class UpdateBook(BaseModel):
-    title:str
-    author: str
-    publisher: str
-    
-    
-@app.get('/getbooks', response_model= List[Book])
-async def get_all_books():
-    return books
-
-@app.post('/getbooks')
-async def add_book(book1:Book)->list:
-    added_book = book1.model_dump()
-    books.append(added_book)
-    return books
-
-@app.get('/book/{book_id}')
-async def search_book(book_id:int):
-    for book in books :
-        if book["id"]==book_id:
-            return book
-        
-@app.patch('/book/{book_id}')
-async def update_book(book_id:int, updated_book:UpdateBook):
-    for book in books:
-        if book["id"]==book_id:
-            book["title"] = updated_book.title
-            book['author'] = updated_book.author
-            book['publisher'] = updated_book.publisher
-            return book
-            
-        
