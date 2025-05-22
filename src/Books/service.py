@@ -2,6 +2,8 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from .schema import BookCreateModel, UpdateBook
 from sqlmodel import select, desc
 from .models import Book 
+from datetime import datetime
+import uuid
 
 class BookService:
     async def get_all_books(self, session:AsyncSession):
@@ -9,8 +11,8 @@ class BookService:
         result = await session.exec(statement)
         return result.all()
     
-    async def get_book(self,book_uid:str, session:AsyncSession):
-        statement = select(Book).where(Book.uid= book_uid)
+    async def get_book(self,book_uid:uuid.UUID, session:AsyncSession):
+        statement = select(Book).where(Book.uid==book_uid)
         result = await session.exec(statement)
         return result.first()
         
@@ -20,12 +22,13 @@ class BookService:
         new_book = Book(
             **book_data_dict
         )
+        new_book.published_date = datetime.strptime(book_data_dict['published_date'], "%Y-%m-%dT%H:%M:%S")
         session.add(new_book)
         await session.commit()
-        return new_book
+        return new_book.model_dump()
     
-    async def update_book(self,book_uid:str, update_data:UpdateBook, session:AsyncSession):
-        book_to_update = self.get_book(book_uid, session)
+    async def update_book(self,book_uid:uuid.UUID, update_data:UpdateBook, session:AsyncSession):
+        book_to_update = await self.get_book(book_uid, session)
         update_data_dict = update_data.model_dump()
         for k , v in update_data_dict.items():
             setattr(book_to_update, k , v )
