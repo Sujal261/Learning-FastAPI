@@ -17,3 +17,5 @@ class UserModel(BaseModel):
     password_hash: str 
     created_at: datetime 
     updated_at: datetime 
+    
+class UserLogin(BaseModel):
